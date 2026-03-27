@@ -11,7 +11,7 @@ app.use(express.json());
 
 const node = new RaftNode(NODE_ID, PORT, PEERS);
 
-mongoose.connect("mongodb+srv://samarthkeshari8_db_user:s5sghJu9hvfXXZn2@cluster0.jayytfd.mongodb.net/?appName=Cluster0");
+mongoose.connect("mongodb+srv://youruser:yourpassword@cluster0.xxxxxx.mongodb.net/consensus?retryWrites=true&w=majority");
 const StateModel = mongoose.model("State", new mongoose.Schema({
     key: String, value: String, term: Number, committedBy: Number
 }));
