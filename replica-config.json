@@ -1,0 +1,22 @@
+{
+  "cluster": "SyncCore",
+  "version": 6,
+  "nodes": [
+    {
+      "id": 1,
+      "port": 3001,
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "port": 3002,
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "port": 3003,
+      "status": "removed"
+    }
+  ],
+  "lastUpdated": "2026-04-07T09:49:16.457Z"
+}
