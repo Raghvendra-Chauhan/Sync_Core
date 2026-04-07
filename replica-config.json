@@ -1,6 +1,6 @@
 {
   "cluster": "SyncCore",
-  "version": 6,
+  "version": 7,
   "nodes": [
     {
       "id": 1,
@@ -15,8 +15,8 @@
     {
       "id": 3,
       "port": 3003,
-      "status": "removed"
+      "status": "active"
     }
   ],
-  "lastUpdated": "2026-04-07T09:49:16.457Z"
+  "lastUpdated": "2026-04-07T09:49:30.512Z"
 }
