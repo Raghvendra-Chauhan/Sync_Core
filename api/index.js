@@ -50,4 +50,7 @@ app.get("/cluster-status", async (req, res) => {
     })));
 });
 
+// Serve the dashboard
+app.use(express.static('dashboard'));
+
 app.listen(3000, () => console.log("Proposal API running on port 3000"));

@@ -37,3 +37,7 @@
 [2026-04-07T09:51:00.531Z] Node 1 is UP | Role: LEADER | Term: 1
 [2026-04-07T09:51:00.535Z] Node 2 is UP | Role: FOLLOWER | Term: 1
 [2026-04-07T09:51:00.538Z] Node 3 is UP | Role: FOLLOWER | Term: 1
+[2026-04-07T09:54:19.396Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-07T09:54:21.442Z] Node 1 is UP | Role: LEADER | Term: 1
+[2026-04-07T09:54:21.445Z] Node 2 is UP | Role: FOLLOWER | Term: 1
+[2026-04-07T09:54:21.449Z] Node 3 is UP | Role: FOLLOWER | Term: 1

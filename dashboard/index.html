@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SyncCore Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0f1e;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #00d4ff;
+            letter-spacing: 3px;
+        }
+
+        header p {
+            color: #666;
+            margin-top: 6px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .cluster-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .node-card {
+            background: #111827;
+            border: 2px solid #1f2937;
+            border-radius: 16px;
+            padding: 28px;
+            width: 220px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .node-card.leader {
+            border-color: #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .node-card.follower {
+            border-color: #374151;
+        }
+
+        .node-card.down {
+            border-color: #ef4444;
+            opacity: 0.6;
+        }
+
+        .node-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .node-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .node-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .badge-leader {
+            background: #00d4ff22;
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+        }
+
+        .badge-follower {
+            background: #ffffff11;
+            color: #aaa;
+            border: 1px solid #444;
+        }
+
+        .badge-down {
+            background: #ef444422;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .badge-candidate {
+            background: #f59e0b22;
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+
+        .node-info {
+            font-size: 0.82rem;
+            color: #6b7280;
+            line-height: 1.8;
+        }
+
+        .node-info span {
+            color: #9ca3af;
+        }
+
+        .crown {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.6rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 20px 32px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        .log-section {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 900px;
+            margin: 0 auto 40px;
+        }
+
+        .log-section h2 {
+            font-size: 1rem;
+            color: #00d4ff;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+
+        .log-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.82rem;
+            font-family: monospace;
+        }
+
+        .log-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #1f2937;
+            color: #9ca3af;
+        }
+
+        .log-list li.log-up {
+            color: #34d399;
+        }
+
+        .log-list li.log-down {
+            color: #ef4444;
+        }
+
+        .log-list li.log-leader {
+            color: #00d4ff;
+        }
+
+        .propose-section {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 900px;
+            margin: 0 auto 40px;
+        }
+
+        .propose-section h2 {
+            font-size: 1rem;
+            color: #00d4ff;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+
+        .propose-form {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .propose-form input {
+            flex: 1;
+            background: #0a0f1e;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #fff;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .propose-form input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .propose-form button {
+            background: #00d4ff;
+            color: #0a0f1e;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .propose-form button:hover {
+            opacity: 0.85;
+        }
+
+        .propose-result {
+            margin-top: 12px;
+            font-size: 0.82rem;
+            font-family: monospace;
+            color: #34d399;
+            min-height: 20px;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .refresh-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #374151;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>⚡ SYNCCORE</h1>
+        <p>DISTRIBUTED CONSENSUS DASHBOARD — LIVE</p>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-box">
+            <div class="stat-value" id="stat-term">—</div>
+            <div class="stat-label">CURRENT TERM</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-leader">—</div>
+            <div class="stat-label">CURRENT LEADER</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-alive">—</div>
+            <div class="stat-label">NODES ALIVE</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-commits">0</div>
+            <div class="stat-label">TOTAL COMMITS</div>
+        </div>
+    </div>
+
+    <div class="cluster-grid" id="cluster-grid">
+        <!-- Node cards injected by JS -->
+    </div>
+
+    <div class="propose-section">
+        <h2>📡 PROPOSE STATE CHANGE</h2>
+        <div class="propose-form">
+            <input type="text" id="prop-key" placeholder="Key (e.g. app_mode)" />
+            <input type="text" id="prop-value" placeholder="Value (e.g. production)" />
+            <button onclick="proposeState()">PROPOSE</button>
+        </div>
+        <div class="propose-result" id="propose-result"></div>
+    </div>
+
+    <div class="log-section">
+        <h2>📋 LIVE EVENT LOG</h2>
+        <ul class="log-list" id="log-list"></ul>
+    </div>
+
+    <div class="refresh-note pulse">● UPDATING EVERY 2 SECONDS</div>
+
+    <script>
+        let commitCount = 0;
+        let previousStates = {};
+        const logs = [];
+
+        function addLog(message, type = "") {
+            const time = new Date().toLocaleTimeString();
+            logs.unshift({ message: `[${time}] ${message}`, type });
+            if (logs.length > 50) logs.pop();
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const list = document.getElementById("log-list");
+            list.innerHTML = logs.map(l =>
+                `<li class="log-${l.type}">${l.message}</li>`
+            ).join("");
+        }
+
+        function getNodeIcon(state) {
+            if (state === "leader") return "👑";
+            if (state === "candidate") return "🗳️";
+            if (state === "down") return "💀";
+            return "🖥️";
+        }
+
+        function renderNodes(nodes) {
+            const grid = document.getElementById("cluster-grid");
+            let leaderNode = "None";
+            let maxTerm = 0;
+            let aliveCount = 0;
+
+            grid.innerHTML = nodes.map(n => {
+                const isDown = n.status === "unreachable";
+                const state = isDown ? "down" : n.status.state;
+                const term = isDown ? "—" : n.status.term;
+                const port = 3000 + n.node;
+
+                if (!isDown) {
+                    aliveCount++;
+                    if (n.status.term > maxTerm) maxTerm = n.status.term;
+                    if (n.status.leader) leaderNode = `Node ${n.node}`;
+                }
+
+                // Detect state changes for logging
+                const prevState = previousStates[n.node];
+                if (prevState !== undefined && prevState !== state) {
+                    if (state === "down") addLog(`Node ${n.node} went DOWN`, "down");
+                    else if (state === "leader") addLog(`Node ${n.node} became LEADER (term ${term})`, "leader");
+                    else if (prevState === "down") addLog(`Node ${n.node} came back UP`, "up");
+                }
+                previousStates[n.node] = state;
+
+                const badgeClass = `badge-${state}`;
+                const cardClass = `node-card ${state}`;
+                const crown = state === "leader" ? `<div class="crown">👑</div>` : "";
+
+                return `
+        <div class="${cardClass}">
+          ${crown}
+          <div class="node-icon">${getNodeIcon(state)}</div>
+          <div class="node-title">NODE ${n.node}</div>
+          <div class="node-badge ${badgeClass}">${state.toUpperCase()}</div>
+          <div class="node-info">
+            Port: <span>${port}</span><br/>
+            Term: <span>${term}</span><br/>
+            Voted For: <span>${isDown ? "—" : (n.status.votedFor ?? "none")}</span>
+          </div>
+        </div>`;
+            }).join("");
+
+            document.getElementById("stat-term").textContent = maxTerm || "—";
+            document.getElementById("stat-leader").textContent = leaderNode;
+            document.getElementById("stat-alive").textContent = `${aliveCount}/3`;
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch("/cluster-status");
+                const nodes = await res.json();
+                renderNodes(nodes);
+            } catch (err) {
+                addLog("API unreachable", "down");
+            }
+        }
+
+        async function proposeState() {
+            const key = document.getElementById("prop-key").value.trim();
+            const value = document.getElementById("prop-value").value.trim();
+            const resultEl = document.getElementById("propose-result");
+
+            if (!key || !value) {
+                resultEl.style.color = "#ef4444";
+                resultEl.textContent = "Please enter both key and value";
+                return;
+            }
+
+            resultEl.style.color = "#f59e0b";
+            resultEl.textContent = "Proposing...";
+
+            try {
+                const res = await fetch("/propose", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ key, value })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    commitCount++;
+                    document.getElementById("stat-commits").textContent = commitCount;
+                    resultEl.style.color = "#34d399";
+                    resultEl.textContent = `✓ Committed: ${key} = ${value} via ${data.leader}`;
+                    addLog(`State committed: ${key} = ${value}`, "leader");
+                    document.getElementById("prop-key").value = "";
+                    document.getElementById("prop-value").value = "";
+                } else {
+                    resultEl.style.color = "#ef4444";
+                    resultEl.textContent = `✗ Failed: ${data.error}`;
+                }
+            } catch (err) {
+                resultEl.style.color = "#ef4444";
+                resultEl.textContent = "✗ API unreachable";
+            }
+        }
+
+        // Start polling
+        addLog("Dashboard connected", "up");
+        fetchStatus();
+        setInterval(fetchStatus, 2000);
+    </script>
+
+</body>
+
+</html>
