@@ -7,7 +7,7 @@ class RaftNode {
     constructor(id, port, peers) {
         this.id = id;
         this.port = port;
-        this.peers = peers; // array of peer URLs e.g. ["http://localhost:3002"]
+        this.peers = peers;
 
         this.state = STATES.FOLLOWER;
         this.currentTerm = 0;
@@ -20,7 +20,7 @@ class RaftNode {
         this.resetElectionTimer();
     }
 
-    // Random timeout between 1500ms–3000ms (Raft standard)
+    // Random timeout between 1500ms–3000ms (Raft standard) 1.5 sec to 3sec
     getRandomTimeout() {
         return Math.floor(Math.random() * 1500) + 1500;
     }
@@ -65,8 +65,6 @@ class RaftNode {
         this.state = STATES.LEADER;
         console.log(`[Node ${this.id}] *** BECAME LEADER for term ${this.currentTerm} ***`);
         clearTimeout(this.electionTimeout);
-
-        // Send heartbeats every 500ms
         this.heartbeatInterval = setInterval(() => this.sendHeartbeats(), 500);
     }
 
@@ -78,7 +76,6 @@ class RaftNode {
                     leaderId: this.id,
                 });
             } catch (err) {
-                // peer down, ignore for now
             }
         }
     }

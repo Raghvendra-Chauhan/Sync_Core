@@ -1,0 +1,35 @@
+[2026-04-02T06:16:03.481Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-02T06:16:05.528Z] Node 1 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T06:16:05.534Z] Node 2 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T06:16:05.539Z] Node 3 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T06:16:31.569Z] Node 1 is DOWN | Last known state: up
+[2026-04-02T06:16:31.571Z] Node 2 is DOWN | Last known state: up
+[2026-04-02T06:16:33.577Z] Node 3 is DOWN | Last known state: up
+[2026-04-02T09:20:08.444Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-02T09:20:10.484Z] Node 1 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T09:20:10.488Z] Node 2 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T09:20:10.491Z] Node 3 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T09:23:37.449Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-02T09:23:39.494Z] Node 1 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T09:23:39.498Z] Node 2 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T09:23:39.502Z] Node 3 is UP | Role: FOLLOWER | Term: 2
+[2026-04-02T09:25:39.784Z] Node 1 is DOWN | Last known state: up
+[2026-04-02T09:25:53.848Z] Node 3 is DOWN | Last known state: up
+[2026-04-02T09:26:05.880Z] Node 2 is DOWN | Last known state: up
+[2026-04-07T09:02:42.479Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-07T09:02:44.519Z] Node 1 is DOWN | Last known state: unknown
+[2026-04-07T09:02:44.521Z] Node 2 is DOWN | Last known state: unknown
+[2026-04-07T09:02:44.523Z] Node 3 is DOWN | Last known state: unknown
+[2026-04-07T09:03:36.401Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-07T09:03:38.431Z] Node 1 is DOWN | Last known state: unknown
+[2026-04-07T09:03:38.435Z] Node 2 is DOWN | Last known state: unknown
+[2026-04-07T09:03:38.437Z] Node 3 is DOWN | Last known state: unknown
+[2026-04-07T09:07:21.387Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-07T09:07:23.449Z] Node 1 is DOWN | Last known state: unknown
+[2026-04-07T09:07:23.455Z] Node 2 is DOWN | Last known state: unknown
+[2026-04-07T09:07:23.458Z] Node 3 is DOWN | Last known state: unknown
+[2026-04-07T09:33:25.467Z] 🚀 Network Monitor Started — watching 3 nodes...
+[2026-04-07T09:33:27.505Z] Node 1 is UP | Role: FOLLOWER | Term: 2
+[2026-04-07T09:33:27.509Z] Node 2 is UP | Role: FOLLOWER | Term: 2
+[2026-04-07T09:33:27.512Z] Node 3 is UP | Role: FOLLOWER | Term: 2
+[2026-04-07T09:35:11.766Z] Node 1 is DOWN | Last known state: up
