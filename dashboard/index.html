@@ -4,472 +4,1577 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SyncCore Dashboard</title>
+    <title>SyncCore — Distributed Consensus Dashboard</title>
     <style>
-        * {
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f8f9fb;
+            --surface: #ffffff;
+            --border: #e5e7eb;
+            --border-light: #f3f4f6;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --text-faint: #9ca3af;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --green: #16a34a;
+            --green-light: #f0fdf4;
+            --green-border: #bbf7d0;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --red-border: #fecaca;
+            --amber: #d97706;
+            --amber-light: #fffbeb;
+            --amber-border: #fde68a;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0a0f1e;
-            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Layout */
+        .app {
+            display: grid;
+            grid-template-columns: 220px 1fr;
             min-height: 100vh;
-            padding: 30px;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            color: #00d4ff;
-            letter-spacing: 3px;
+        .main {
+            padding: 28px;
+            overflow-y: auto;
         }
 
-        header p {
-            color: #666;
-            margin-top: 6px;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
+        /* Sidebar */
+        .sidebar-logo {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
         }
 
-        .cluster-grid {
+        .sidebar-logo-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-logo-sub {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 2px;
+        }
+
+        .sidebar-section {
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-faint);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 0 8px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item {
             display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 40px;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: all 0.15s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 12px 20px;
+        }
+
+        .cluster-health {
+            padding: 12px 20px;
+        }
+
+        .health-label {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .health-nodes {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .health-node {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .health-node-name {
+            color: var(--text-muted);
+        }
+
+        .health-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-green {
+            background: var(--green);
+        }
+
+        .dot-red {
+            background: var(--red);
+        }
+
+        .dot-amber {
+            background: var(--amber);
+        }
+
+        /* Page sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Metrics row */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .metric-value.green {
+            color: var(--green);
+        }
+
+        .metric-value.accent {
+            color: var(--accent);
+        }
+
+        .metric-sub-text {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 4px;
+        }
+
+        /* Node grid */
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
         }
 
         .node-card {
-            background: #111827;
-            border: 2px solid #1f2937;
-            border-radius: 16px;
-            padding: 28px;
-            width: 220px;
-            text-align: center;
-            transition: all 0.3s ease;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
             position: relative;
+            overflow: hidden;
         }
 
         .node-card.leader {
-            border-color: #00d4ff;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            border-color: var(--green);
         }
 
-        .node-card.follower {
-            border-color: #374151;
+        .node-card.leader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--green);
         }
 
         .node-card.down {
-            border-color: #ef4444;
-            opacity: 0.6;
+            border-color: var(--red-border);
+            background: var(--red-light);
+            opacity: 0.8;
         }
 
-        .node-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
+        .node-card.candidate {
+            border-color: var(--amber-border);
         }
 
-        .node-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #fff;
+        .node-card.candidate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--amber);
         }
 
-        .node-badge {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            letter-spacing: 1px;
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 14px;
         }
 
+        .node-name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .badge-leader {
-            background: #00d4ff22;
-            color: #00d4ff;
-            border: 1px solid #00d4ff;
+            background: var(--green-light);
+            color: var(--green);
+            border: 1px solid var(--green-border);
         }
 
         .badge-follower {
-            background: #ffffff11;
-            color: #aaa;
-            border: 1px solid #444;
+            background: var(--bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
         }
 
         .badge-down {
-            background: #ef444422;
-            color: #ef4444;
-            border: 1px solid #ef4444;
+            background: var(--red-light);
+            color: var(--red);
+            border: 1px solid var(--red-border);
         }
 
         .badge-candidate {
-            background: #f59e0b22;
-            color: #f59e0b;
-            border: 1px solid #f59e0b;
+            background: var(--amber-light);
+            color: var(--amber);
+            border: 1px solid var(--amber-border);
         }
 
-        .node-info {
-            font-size: 0.82rem;
-            color: #6b7280;
-            line-height: 1.8;
+        .node-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 14px;
         }
 
-        .node-info span {
-            color: #9ca3af;
+        .node-stat {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
         }
 
-        .crown {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.6rem;
+        .node-stat-label {
+            font-size: 10px;
+            color: var(--text-faint);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
 
-        .stats-bar {
+        .node-stat-val {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        .node-actions {
             display: flex;
-            gap: 20px;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+            white-space: nowrap;
         }
 
-        .stat-box {
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 12px;
-            padding: 20px 32px;
-            text-align: center;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #00d4ff;
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: #6b7280;
+        .btn-primary:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: white;
+            color: var(--red);
+            border-color: var(--red-border);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--red-light);
+        }
+
+        .btn-warning {
+            background: white;
+            color: var(--amber);
+            border-color: var(--amber-border);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: var(--amber-light);
+        }
+
+        .btn-ghost {
+            background: white;
+            color: var(--text-muted);
+            border-color: var(--border);
+        }
+
+        .btn-ghost:hover:not(:disabled) {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        .btn-lg {
+            padding: 10px 20px;
+            font-size: 13px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--text);
+            background: var(--surface);
+            outline: none;
+            transition: border 0.15s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-faint);
             margin-top: 4px;
-            letter-spacing: 1px;
         }
 
-        .log-section {
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 900px;
-            margin: 0 auto 40px;
+        /* Alert */
+        .alert {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 14px;
+            border: 1px solid;
         }
 
-        .log-section h2 {
-            font-size: 1rem;
-            color: #00d4ff;
-            margin-bottom: 16px;
-            letter-spacing: 2px;
+        .alert-success {
+            background: var(--green-light);
+            color: var(--green);
+            border-color: var(--green-border);
         }
 
-        .log-list {
-            list-style: none;
-            max-height: 200px;
+        .alert-error {
+            background: var(--red-light);
+            color: var(--red);
+            border-color: var(--red-border);
+        }
+
+        .alert-info {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-color: #bfdbfe;
+        }
+
+        .alert-warning {
+            background: var(--amber-light);
+            color: var(--amber);
+            border-color: var(--amber-border);
+        }
+
+        /* Table */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--bg);
+        }
+
+        .mono {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
+        }
+
+        /* Log */
+        .log-container {
+            background: #0f172a;
+            border-radius: var(--radius);
+            padding: 16px;
+            max-height: 380px;
             overflow-y: auto;
-            font-size: 0.82rem;
-            font-family: monospace;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
         }
 
-        .log-list li {
-            padding: 6px 0;
-            border-bottom: 1px solid #1f2937;
-            color: #9ca3af;
-        }
-
-        .log-list li.log-up {
-            color: #34d399;
-        }
-
-        .log-list li.log-down {
-            color: #ef4444;
-        }
-
-        .log-list li.log-leader {
-            color: #00d4ff;
-        }
-
-        .propose-section {
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 900px;
-            margin: 0 auto 40px;
-        }
-
-        .propose-section h2 {
-            font-size: 1rem;
-            color: #00d4ff;
-            margin-bottom: 16px;
-            letter-spacing: 2px;
-        }
-
-        .propose-form {
+        .log-line {
+            padding: 3px 0;
+            color: #94a3b8;
             display: flex;
             gap: 12px;
-            flex-wrap: wrap;
         }
 
-        .propose-form input {
+        .log-time {
+            color: #475569;
+            flex-shrink: 0;
+        }
+
+        .log-msg {
             flex: 1;
-            background: #0a0f1e;
-            border: 1px solid #374151;
-            border-radius: 8px;
-            padding: 10px 16px;
-            color: #fff;
-            font-size: 0.9rem;
-            min-width: 150px;
         }
 
-        .propose-form input:focus {
-            outline: none;
-            border-color: #00d4ff;
+        .log-up {
+            color: #4ade80;
         }
 
-        .propose-form button {
-            background: #00d4ff;
-            color: #0a0f1e;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 24px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
+        .log-down {
+            color: #f87171;
         }
 
-        .propose-form button:hover {
-            opacity: 0.85;
+        .log-leader {
+            color: #60a5fa;
         }
 
-        .propose-result {
-            margin-top: 12px;
-            font-size: 0.82rem;
+        .log-info {
+            color: #94a3b8;
+        }
+
+        /* Git history */
+        .git-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .git-hash {
             font-family: monospace;
-            color: #34d399;
-            min-height: 20px;
+            font-size: 11px;
+            background: var(--purple-light);
+            color: var(--purple);
+            padding: 2px 7px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .git-msg {
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        /* Replica config */
+        .replica-node {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+            background: var(--surface);
+        }
+
+        .replica-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .replica-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .replica-active {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .replica-removed {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        /* Two col layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* Pulse animation */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
         }
 
         .pulse {
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.4;
-            }
+        /* Status indicator */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
         }
 
-        .refresh-note {
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Empty state */
+        .empty {
             text-align: center;
-            font-size: 0.75rem;
-            color: #374151;
-            margin-top: 20px;
+            padding: 40px 20px;
+            color: var(--text-faint);
+            font-size: 13px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 900px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nodes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .two-col,
+            .three-col {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>⚡ SYNCCORE</h1>
-        <p>DISTRIBUTED CONSENSUS DASHBOARD — LIVE</p>
-    </header>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-name">SyncCore</div>
+                <div class="sidebar-logo-sub">Distributed Consensus System</div>
+            </div>
 
-    <div class="stats-bar">
-        <div class="stat-box">
-            <div class="stat-value" id="stat-term">—</div>
-            <div class="stat-label">CURRENT TERM</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-value" id="stat-leader">—</div>
-            <div class="stat-label">CURRENT LEADER</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-value" id="stat-alive">—</div>
-            <div class="stat-label">NODES ALIVE</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-value" id="stat-commits">0</div>
-            <div class="stat-label">TOTAL COMMITS</div>
-        </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Monitor</div>
+                <button class="nav-item active" onclick="showPage('overview')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Overview
+                </button>
+                <button class="nav-item" onclick="showPage('nodes')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                    </svg>
+                    Cluster Nodes
+                </button>
+                <button class="nav-item" onclick="showPage('logs')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    Event Log
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Data</div>
+                <button class="nav-item" onclick="showPage('states')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                    </svg>
+                    MongoDB States
+                </button>
+                <button class="nav-item" onclick="showPage('git')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="18" cy="18" r="3" />
+                        <circle cx="6" cy="6" r="3" />
+                        <path d="M6 21V9a9 9 0 0 0 9 9" />
+                    </svg>
+                    Git History
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Control</div>
+                <button class="nav-item" onclick="showPage('propose')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                    Propose State
+                </button>
+                <button class="nav-item" onclick="showPage('replica')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Replica Config
+                </button>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="cluster-health">
+                <div class="health-label">Node Health</div>
+                <div class="health-nodes" id="sidebar-health"></div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-dot pulse" id="global-dot" style="background:var(--green)"></div>
+                <span id="global-status">Connecting to cluster...</span>
+                <span style="margin-left:auto;color:var(--text-faint);font-size:11px;" id="last-updated"></span>
+            </div>
+
+            <!-- OVERVIEW PAGE -->
+            <div class="page active" id="page-overview">
+                <div class="page-title">Cluster Overview</div>
+                <div class="page-sub">Real-time status of your SyncCore distributed consensus cluster</div>
+
+                <div class="metrics">
+                    <div class="metric-card">
+                        <div class="metric-label">Current Term</div>
+                        <div class="metric-value accent" id="ov-term">—</div>
+                        <div class="metric-sub-text">Raft election epoch</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Current Leader</div>
+                        <div class="metric-value green" id="ov-leader" style="font-size:18px;padding-top:4px;">—</div>
+                        <div class="metric-sub-text">Active consensus leader</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Nodes Alive</div>
+                        <div class="metric-value" id="ov-alive">—</div>
+                        <div class="metric-sub-text">Of 3 total nodes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Commits</div>
+                        <div class="metric-value" id="ov-commits">0</div>
+                        <div class="metric-sub-text">State writes this session</div>
+                    </div>
+                </div>
+
+                <div class="nodes-grid" id="ov-nodes"></div>
+
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-title">Quick Actions</div>
+                        <div class="card-sub">Control the cluster without touching the terminal</div>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <button class="btn btn-success btn-lg btn-full" onclick="showPage('propose')">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                                Propose State Change
+                            </button>
+                            <button class="btn btn-primary btn-lg btn-full" onclick="refreshAll()">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <polyline points="23 4 23 10 17 10" />
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                                </svg>
+                                Refresh Cluster Status
+                            </button>
+                            <button class="btn btn-ghost btn-lg btn-full" onclick="showPage('logs')">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                View Event Log
+                            </button>
+                            <button class="btn btn-ghost btn-lg btn-full" onclick="downloadLog()">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Download Network Log
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Live Event Feed</div>
+                        <div class="card-sub">Last 10 cluster events</div>
+                        <div class="log-container" style="max-height:220px;" id="ov-log"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NODES PAGE -->
+            <div class="page" id="page-nodes">
+                <div class="page-title">Cluster Nodes</div>
+                <div class="page-sub">Start, stop, and restart individual nodes. Simulate failures and watch Raft
+                    recover.</div>
+
+                <div id="nodes-alert"></div>
+
+                <div class="nodes-grid" id="nodes-detail"></div>
+
+                <div class="card" style="margin-bottom:24px;">
+                    <div class="card-title">Bulk Actions</div>
+                    <div class="card-sub">Control all nodes at once</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-success btn-lg" onclick="restartAll()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <polyline points="23 4 23 10 17 10" />
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                            </svg>
+                            Restart All Nodes
+                        </button>
+                        <button class="btn btn-danger btn-lg" onclick="stopAll()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                            </svg>
+                            Stop All Nodes
+                        </button>
+                        <button class="btn btn-ghost btn-lg" onclick="refreshAll()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <polyline points="23 4 23 10 17 10" />
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                            </svg>
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOGS PAGE -->
+            <div class="page" id="page-logs">
+                <div class="page-title">Event Log</div>
+                <div class="page-sub">Live network monitor log — node up/down events, leader elections, failures</div>
+
+                <div style="display:flex;gap:10px;margin-bottom:16px;">
+                    <button class="btn btn-primary" onclick="fetchLogs()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                        </svg>
+                        Refresh Logs
+                    </button>
+                    <button class="btn btn-ghost" onclick="downloadLog()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Download Full Log
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="log-container" style="max-height:500px;" id="logs-container">
+                        <div class="empty" style="color:#475569;">Loading logs...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATES PAGE -->
+            <div class="page" id="page-states">
+                <div class="page-title">MongoDB Committed States</div>
+                <div class="page-sub">All state changes committed by the leader to MongoDB Atlas</div>
+
+                <div style="display:flex;gap:10px;margin-bottom:16px;">
+                    <button class="btn btn-primary" onclick="fetchStates()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="table-wrap">
+                        <table id="states-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Value</th>
+                                    <th>Term</th>
+                                    <th>Committed By</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="states-body">
+                                <tr>
+                                    <td colspan="5" class="empty">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GIT PAGE -->
+            <div class="page" id="page-git">
+                <div class="page-title">Git History</div>
+                <div class="page-sub">Replica configuration changes tracked automatically via Git commits</div>
+
+                <div style="display:flex;gap:10px;margin-bottom:16px;">
+                    <button class="btn btn-primary" onclick="fetchGit()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div id="git-list">
+                        <div class="empty">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROPOSE PAGE -->
+            <div class="page" id="page-propose">
+                <div class="page-title">Propose State Change</div>
+                <div class="page-sub">Send a state change proposal to the cluster. It will be routed to the current
+                    leader automatically.</div>
+
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-title">New Proposal</div>
+                        <div class="card-sub">The API will find the leader and commit the change</div>
+
+                        <div id="propose-alert"></div>
+
+                        <div class="form-group">
+                            <label class="form-label">Key</label>
+                            <input class="form-input" type="text" id="prop-key"
+                                placeholder="e.g. app_mode, db_version, config_flag" />
+                            <div class="form-hint">The state variable name you want to set</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Value</label>
+                            <input class="form-input" type="text" id="prop-val"
+                                placeholder="e.g. production, v2.1, true" />
+                            <div class="form-hint">The value to commit to the cluster state</div>
+                        </div>
+                        <button class="btn btn-success btn-lg btn-full" onclick="propose()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            Propose to Cluster
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Committed This Session</div>
+                        <div class="card-sub">State changes you have proposed today</div>
+                        <div id="session-commits">
+                            <div class="empty">No commits yet this session</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPLICA PAGE -->
+            <div class="page" id="page-replica">
+                <div class="page-title">Replica Configuration</div>
+                <div class="page-sub">Manage cluster membership. Every change is automatically committed to Git.</div>
+
+                <div id="replica-alert"></div>
+
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-title">Current Replica Set</div>
+                        <div class="card-sub">Active nodes in the cluster configuration</div>
+                        <div id="replica-list">
+                            <div class="empty">Loading...</div>
+                        </div>
+                        <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="fetchReplicaConfig()">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <polyline points="23 4 23 10 17 10" />
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                            </svg>
+                            Refresh Config
+                        </button>
+                    </div>
+
+                    <div>
+                        <div class="card" style="margin-bottom:14px;">
+                            <div class="card-title">Add Node</div>
+                            <div class="card-sub">Register a new node in the replica config</div>
+                            <div class="form-row" style="margin-bottom:10px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Node ID</label>
+                                    <input class="form-input" type="number" id="add-id" placeholder="4" />
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label class="form-label">Port</label>
+                                    <input class="form-input" type="number" id="add-port" placeholder="3004" />
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-full" onclick="addNode()">Add to Cluster</button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">Remove Node</div>
+                            <div class="card-sub">Remove a node from replica membership</div>
+                            <div class="form-group">
+                                <label class="form-label">Node ID to Remove</label>
+                                <input class="form-input" type="number" id="remove-id" placeholder="3" />
+                            </div>
+                            <button class="btn btn-danger btn-full" onclick="removeNode()">Remove from Cluster</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Git Log — Config Changes</div>
+                    <div class="card-sub">Every add/remove is auto-committed to Git</div>
+                    <div id="replica-git">
+                        <div class="empty">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
-
-    <div class="cluster-grid" id="cluster-grid">
-        <!-- Node cards injected by JS -->
-    </div>
-
-    <div class="propose-section">
-        <h2>📡 PROPOSE STATE CHANGE</h2>
-        <div class="propose-form">
-            <input type="text" id="prop-key" placeholder="Key (e.g. app_mode)" />
-            <input type="text" id="prop-value" placeholder="Value (e.g. production)" />
-            <button onclick="proposeState()">PROPOSE</button>
-        </div>
-        <div class="propose-result" id="propose-result"></div>
-    </div>
-
-    <div class="log-section">
-        <h2>📋 LIVE EVENT LOG</h2>
-        <ul class="log-list" id="log-list"></ul>
-    </div>
-
-    <div class="refresh-note pulse">● UPDATING EVERY 2 SECONDS</div>
 
     <script>
-        let commitCount = 0;
-        let previousStates = {};
-        const logs = [];
+        let clusterData = [];
+        let sessionCommits = [];
+        let sessionCommitCount = 0;
+        let liveLogs = [];
 
-        function addLog(message, type = "") {
-            const time = new Date().toLocaleTimeString();
-            logs.unshift({ message: `[${time}] ${message}`, type });
-            if (logs.length > 50) logs.pop();
-            renderLogs();
+        // Navigation
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => {
+                if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+            });
+            if (id === 'logs') fetchLogs();
+            if (id === 'states') fetchStates();
+            if (id === 'git') fetchGit();
+            if (id === 'replica') { fetchReplicaConfig(); fetchGit(); }
         }
 
-        function renderLogs() {
-            const list = document.getElementById("log-list");
-            list.innerHTML = logs.map(l =>
-                `<li class="log-${l.type}">${l.message}</li>`
-            ).join("");
+        // Alert helper
+        function showAlert(containerId, msg, type = 'info') {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+            setTimeout(() => { if (el) el.innerHTML = ''; }, 4000);
         }
 
-        function getNodeIcon(state) {
-            if (state === "leader") return "👑";
-            if (state === "candidate") return "🗳️";
-            if (state === "down") return "💀";
-            return "🖥️";
+        // Add to live log
+        function addLog(msg, type = 'info') {
+            const t = new Date().toTimeString().slice(0, 8);
+            liveLogs.unshift({ t, msg, type });
+            if (liveLogs.length > 100) liveLogs.pop();
+            renderLiveLogs();
         }
 
-        function renderNodes(nodes) {
-            const grid = document.getElementById("cluster-grid");
-            let leaderNode = "None";
-            let maxTerm = 0;
-            let aliveCount = 0;
-
-            grid.innerHTML = nodes.map(n => {
-                const isDown = n.status === "unreachable";
-                const state = isDown ? "down" : n.status.state;
-                const term = isDown ? "—" : n.status.term;
-                const port = 3000 + n.node;
-
-                if (!isDown) {
-                    aliveCount++;
-                    if (n.status.term > maxTerm) maxTerm = n.status.term;
-                    if (n.status.leader) leaderNode = `Node ${n.node}`;
-                }
-
-                // Detect state changes for logging
-                const prevState = previousStates[n.node];
-                if (prevState !== undefined && prevState !== state) {
-                    if (state === "down") addLog(`Node ${n.node} went DOWN`, "down");
-                    else if (state === "leader") addLog(`Node ${n.node} became LEADER (term ${term})`, "leader");
-                    else if (prevState === "down") addLog(`Node ${n.node} came back UP`, "up");
-                }
-                previousStates[n.node] = state;
-
-                const badgeClass = `badge-${state}`;
-                const cardClass = `node-card ${state}`;
-                const crown = state === "leader" ? `<div class="crown">👑</div>` : "";
-
-                return `
-        <div class="${cardClass}">
-          ${crown}
-          <div class="node-icon">${getNodeIcon(state)}</div>
-          <div class="node-title">NODE ${n.node}</div>
-          <div class="node-badge ${badgeClass}">${state.toUpperCase()}</div>
-          <div class="node-info">
-            Port: <span>${port}</span><br/>
-            Term: <span>${term}</span><br/>
-            Voted For: <span>${isDown ? "—" : (n.status.votedFor ?? "none")}</span>
-          </div>
-        </div>`;
-            }).join("");
-
-            document.getElementById("stat-term").textContent = maxTerm || "—";
-            document.getElementById("stat-leader").textContent = leaderNode;
-            document.getElementById("stat-alive").textContent = `${aliveCount}/3`;
+        function renderLiveLogs() {
+            const html = liveLogs.map(l =>
+                `<div class="log-line"><span class="log-time">${l.t}</span><span class="log-msg log-${l.type}">${l.msg}</span></div>`
+            ).join('');
+            const ov = document.getElementById('ov-log');
+            if (ov) ov.innerHTML = html || '<div class="log-line"><span class="log-msg log-info">Waiting for events...</span></div>';
         }
 
+        // Fetch cluster status
+        const prevStates = {};
         async function fetchStatus() {
             try {
-                const res = await fetch("/cluster-status");
-                const nodes = await res.json();
-                renderNodes(nodes);
-            } catch (err) {
-                addLog("API unreachable", "down");
+                const res = await fetch('/cluster-status');
+                clusterData = await res.json();
+                renderAll(clusterData);
+                const now = new Date().toLocaleTimeString();
+                document.getElementById('last-updated').textContent = 'Updated ' + now;
+            } catch (e) {
+                document.getElementById('global-status').textContent = 'API unreachable';
+                document.getElementById('global-dot').style.background = 'var(--red)';
             }
         }
 
-        async function proposeState() {
-            const key = document.getElementById("prop-key").value.trim();
-            const value = document.getElementById("prop-value").value.trim();
-            const resultEl = document.getElementById("propose-result");
+        function renderAll(nodes) {
+            let leader = '—', maxTerm = 0, alive = 0;
 
-            if (!key || !value) {
-                resultEl.style.color = "#ef4444";
-                resultEl.textContent = "Please enter both key and value";
-                return;
-            }
+            nodes.forEach(n => {
+                const down = n.status === 'unreachable';
+                const state = down ? 'down' : n.status.state;
+                const term = down ? 0 : n.status.term;
+                if (!down) { alive++; if (term > maxTerm) maxTerm = term; }
+                if (!down && n.status.leader) leader = 'Node ' + n.node;
 
-            resultEl.style.color = "#f59e0b";
-            resultEl.textContent = "Proposing...";
-
-            try {
-                const res = await fetch("/propose", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ key, value })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    commitCount++;
-                    document.getElementById("stat-commits").textContent = commitCount;
-                    resultEl.style.color = "#34d399";
-                    resultEl.textContent = `✓ Committed: ${key} = ${value} via ${data.leader}`;
-                    addLog(`State committed: ${key} = ${value}`, "leader");
-                    document.getElementById("prop-key").value = "";
-                    document.getElementById("prop-value").value = "";
-                } else {
-                    resultEl.style.color = "#ef4444";
-                    resultEl.textContent = `✗ Failed: ${data.error}`;
+                const prev = prevStates[n.node];
+                if (prev !== undefined && prev !== state) {
+                    if (state === 'down') addLog('Node ' + n.node + ' went offline', 'down');
+                    else if (state === 'leader') addLog('Node ' + n.node + ' elected as leader — term ' + term, 'leader');
+                    else if (prev === 'down') addLog('Node ' + n.node + ' rejoined cluster', 'up');
                 }
-            } catch (err) {
-                resultEl.style.color = "#ef4444";
-                resultEl.textContent = "✗ API unreachable";
+                prevStates[n.node] = state;
+            });
+
+            // Metrics
+            const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            setEl('ov-term', maxTerm || '—');
+            setEl('ov-leader', leader);
+            setEl('ov-alive', alive + '/3');
+            setEl('ov-commits', sessionCommitCount);
+
+            // Global status
+            const dot = document.getElementById('global-dot');
+            const status = document.getElementById('global-status');
+            if (alive === 0) { dot.style.background = 'var(--red)'; status.textContent = 'Cluster offline — all nodes down'; }
+            else if (alive < 3) { dot.style.background = 'var(--amber)'; status.textContent = 'Cluster degraded — ' + (3 - alive) + ' node(s) down'; }
+            else { dot.style.background = 'var(--green)'; status.textContent = 'Cluster online — all nodes healthy'; }
+
+            // Sidebar health
+            const sidebarHealth = document.getElementById('sidebar-health');
+            if (sidebarHealth) {
+                sidebarHealth.innerHTML = nodes.map(n => {
+                    const down = n.status === 'unreachable';
+                    const state = down ? 'down' : n.status.state;
+                    const dotClass = down ? 'dot-red' : (state === 'leader' ? 'dot-green' : 'dot-green');
+                    return `<div class="health-node">
+        <span class="health-node-name">Node ${n.node} ${state === 'leader' ? '(leader)' : ''}</span>
+        <span class="health-dot ${dotClass}"></span>
+      </div>`;
+                }).join('');
+            }
+
+            // Node cards (overview)
+            const ovGrid = document.getElementById('ov-nodes');
+            if (ovGrid) ovGrid.innerHTML = nodes.map(n => nodeCard(n, false)).join('');
+
+            // Node cards (nodes page)
+            const nodesGrid = document.getElementById('nodes-detail');
+            if (nodesGrid) nodesGrid.innerHTML = nodes.map(n => nodeCard(n, true)).join('');
+        }
+
+        function nodeCard(n, showControls) {
+            const down = n.status === 'unreachable';
+            const state = down ? 'down' : n.status.state;
+            const term = down ? '—' : n.status.term;
+            const voted = down ? '—' : (n.status.votedFor ?? 'none');
+            const badgeClass = 'badge-' + state;
+            const cardClass = 'node-card ' + state;
+
+            const controls = showControls ? `
+    <div class="node-actions" style="margin-top:14px;">
+      ${!down
+                    ? `<button class="btn btn-danger btn-sm" onclick="stopNode(${n.node})">Stop Node</button>`
+                    : `<button class="btn btn-success btn-sm" onclick="restartNode(${n.node})">Restart Node</button>`
+                }
+      <button class="btn btn-ghost btn-sm" onclick="fetchStatus()">Refresh</button>
+    </div>` : '';
+
+            return `<div class="${cardClass}">
+    <div class="node-header">
+      <div class="node-name">Node ${n.node}</div>
+      <span class="badge ${badgeClass}">${state}</span>
+    </div>
+    <div class="node-stats">
+      <div class="node-stat"><div class="node-stat-label">Port</div><div class="node-stat-val">:${3000 + n.node}</div></div>
+      <div class="node-stat"><div class="node-stat-label">Term</div><div class="node-stat-val">${term}</div></div>
+      <div class="node-stat"><div class="node-stat-label">Voted For</div><div class="node-stat-val">${voted}</div></div>
+      <div class="node-stat"><div class="node-stat-label">State</div><div class="node-stat-val">${state}</div></div>
+    </div>
+    ${controls}
+  </div>`;
+        }
+
+        // Stop node
+        async function stopNode(id) {
+            addLog('Stopping Node ' + id + '...', 'info');
+            try {
+                await fetch('/control/stop/' + id, { method: 'POST' });
+                showAlert('nodes-alert', 'Node ' + id + ' stop signal sent. Watch it go offline.', 'warning');
+                addLog('Stop signal sent to Node ' + id, 'down');
+                setTimeout(fetchStatus, 1000);
+            } catch (e) {
+                showAlert('nodes-alert', 'Failed to stop node ' + id, 'error');
             }
         }
 
-        // Start polling
-        addLog("Dashboard connected", "up");
+        // Restart node
+        async function restartNode(id) {
+            addLog('Restarting Node ' + id + '...', 'info');
+            try {
+                await fetch('/control/restart/' + id, { method: 'POST' });
+                showAlert('nodes-alert', 'Node ' + id + ' is restarting. Watch for new leader election.', 'info');
+                addLog('Restart signal sent to Node ' + id, 'up');
+                setTimeout(fetchStatus, 2000);
+            } catch (e) {
+                showAlert('nodes-alert', 'Failed to restart node ' + id, 'error');
+            }
+        }
+
+        async function stopAll() {
+            for (let i = 1; i <= 3; i++) await stopNode(i);
+        }
+
+        async function restartAll() {
+            for (let i = 1; i <= 3; i++) { await restartNode(i); await new Promise(r => setTimeout(r, 800)); }
+        }
+
+        // Propose
+        async function propose() {
+            const key = document.getElementById('prop-key').value.trim();
+            const val = document.getElementById('prop-val').value.trim();
+            if (!key || !val) { showAlert('propose-alert', 'Key and value are required', 'error'); return; }
+            showAlert('propose-alert', 'Sending proposal to cluster...', 'info');
+            try {
+                const res = await fetch('/propose', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value: val })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    sessionCommitCount++;
+                    sessionCommits.unshift({ key, val, leader: d.leader, time: new Date().toLocaleTimeString() });
+                    showAlert('propose-alert', `Committed: ${key} = ${val} via ${d.leader.replace('http://localhost', '')}`, 'success');
+                    addLog(`State committed: ${key} = ${val}`, 'leader');
+                    document.getElementById('prop-key').value = '';
+                    document.getElementById('prop-val').value = '';
+                    renderSessionCommits();
+                    fetchStatus();
+                } else {
+                    showAlert('propose-alert', d.error || 'Commit failed', 'error');
+                }
+            } catch (e) {
+                showAlert('propose-alert', 'API unreachable', 'error');
+            }
+        }
+
+        function renderSessionCommits() {
+            const el = document.getElementById('session-commits');
+            if (!el) return;
+            if (!sessionCommits.length) { el.innerHTML = '<div class="empty">No commits yet this session</div>'; return; }
+            el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>Key</th><th>Value</th><th>Leader</th><th>Time</th></tr></thead>
+    <tbody>${sessionCommits.map(c => `<tr>
+      <td class="mono">${c.key}</td>
+      <td class="mono">${c.val}</td>
+      <td>${c.leader.replace('http://localhost:', 'Node ').replace('3001', '1').replace('3002', '2').replace('3003', '3')}</td>
+      <td>${c.time}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+        }
+
+        // Fetch network logs
+        async function fetchLogs() {
+            const el = document.getElementById('logs-container');
+            if (!el) return;
+            try {
+                const res = await fetch('/network-log');
+                const data = await res.json();
+                if (!data.logs.length) { el.innerHTML = '<div class="empty" style="color:#475569;">No logs yet — start the monitor</div>'; return; }
+                el.innerHTML = data.logs.map(l => {
+                    const type = l.includes('[DOWN]') ? 'down' : l.includes('[UP]') ? 'up' : 'info';
+                    return `<div class="log-line"><span class="log-msg log-${type}">${l}</span></div>`;
+                }).join('');
+            } catch (e) {
+                el.innerHTML = '<div class="empty" style="color:#f87171;">Could not load logs</div>';
+            }
+        }
+
+        // Download log
+        function downloadLog() {
+            window.location.href = '/network-log/download';
+        }
+
+        // Fetch MongoDB states
+        async function fetchStates() {
+            const tbody = document.getElementById('states-body');
+            if (!tbody) return;
+            try {
+                const res = await fetch('/states');
+                const data = await res.json();
+                if (!data.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">No committed states yet</td></tr>'; return; }
+                tbody.innerHTML = data.map(s => `<tr>
+      <td class="mono">${s.key}</td>
+      <td class="mono">${s.value}</td>
+      <td>${s.term}</td>
+      <td>Node ${s.committedBy}</td>
+      <td style="color:var(--text-faint);font-size:12px;">${new Date(s._id ? parseInt(s._id.toString().substring(0, 8), 16) * 1000 : Date.now()).toLocaleString()}</td>
+    </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty" style="color:var(--red);">Could not fetch states</td></tr>';
+            }
+        }
+
+        // Fetch Git history
+        async function fetchGit() {
+            try {
+                const res = await fetch('/git-history');
+                const data = await res.json();
+                const html = data.commits.map(c =>
+                    `<div class="git-item"><span class="git-hash">${c.hash}</span><span class="git-msg">${c.message}</span></div>`
+                ).join('');
+                const gitList = document.getElementById('git-list');
+                if (gitList) gitList.innerHTML = html || '<div class="empty">No commits yet</div>';
+                const replicaGit = document.getElementById('replica-git');
+                if (replicaGit) replicaGit.innerHTML = html || '<div class="empty">No commits yet</div>';
+            } catch (e) { }
+        }
+
+        // Replica config
+        async function fetchReplicaConfig() {
+            try {
+                const res = await fetch('/replica/config');
+                const data = await res.json();
+                const el = document.getElementById('replica-list');
+                if (!el) return;
+                el.innerHTML = data.nodes.map(n => `
+      <div class="replica-node">
+        <div class="replica-info">
+          <span style="font-weight:600;">Node ${n.id}</span>
+          <span style="color:var(--text-muted);font-size:12px;">Port :${n.port}</span>
+          <span class="replica-badge ${n.status === 'active' ? 'replica-active' : 'replica-removed'}">${n.status}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-faint);">v${data.version}</div>
+      </div>`).join('');
+            } catch (e) { }
+        }
+
+        async function addNode() {
+            const id = document.getElementById('add-id').value;
+            const port = document.getElementById('add-port').value;
+            if (!id || !port) { showAlert('replica-alert', 'Node ID and port required', 'error'); return; }
+            try {
+                const res = await fetch('/replica/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, port }) });
+                const d = await res.json();
+                showAlert('replica-alert', `Node ${id} added to cluster config`, 'success');
+                addLog(`Node ${id} added to replica config`, 'up');
+                fetchReplicaConfig(); fetchGit();
+            } catch (e) { showAlert('replica-alert', 'Failed to add node', 'error'); }
+        }
+
+        async function removeNode() {
+            const id = document.getElementById('remove-id').value;
+            if (!id) { showAlert('replica-alert', 'Node ID required', 'error'); return; }
+            try {
+                await fetch('/replica/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+                showAlert('replica-alert', `Node ${id} removed from cluster config`, 'warning');
+                addLog(`Node ${id} removed from replica config`, 'down');
+                fetchReplicaConfig(); fetchGit();
+            } catch (e) { showAlert('replica-alert', 'Failed to remove node', 'error'); }
+        }
+
+        function refreshAll() { fetchStatus(); fetchLogs(); }
+
+        // Auto polling
+        addLog('Dashboard connected', 'up');
         fetchStatus();
+        fetchGit();
+        fetchReplicaConfig();
         setInterval(fetchStatus, 2000);
+        setInterval(fetchLogs, 5000);
     </script>
 
 </body>

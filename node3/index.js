@@ -39,6 +39,22 @@ app.post("/commit", async (req, res) => {
     res.json({ success: true, committed: { key, value } });
 });
 
+// Get all committed states
+app.get("/states", async (req, res) => {
+    try {
+        const states = await StateModel.find().sort({ _id: -1 }).limit(20);
+        res.json(states);
+    } catch (e) {
+        res.status(500).json({ error: "Could not fetch states" });
+    }
+});
+
+// Graceful shutdown endpoint
+app.post("/shutdown", (req, res) => {
+    res.json({ success: true, message: "Shutting down..." });
+    setTimeout(() => process.exit(0), 300);
+});
+
 app.get("/status", (req, res) => res.json(node.getStatus()));
 
 app.listen(PORT, () => console.log(`Node ${NODE_ID} running on port ${PORT}`));
