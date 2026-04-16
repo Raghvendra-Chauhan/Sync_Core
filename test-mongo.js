@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const uri = "";
+const uri = "  ";
 
 async function testMongo() {
     try {
