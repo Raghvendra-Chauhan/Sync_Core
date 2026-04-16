@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const uri = "  ";
+const uri = "    ";
 
 async function testMongo() {
     try {
@@ -8,7 +8,7 @@ async function testMongo() {
         console.log("Successfully connected to MongoDB Atlas!");
         await mongoose.disconnect();
     } catch (e) {
-        console.error("Connection failed:", e.message);
+        console.error("Connection failed:",   e.message);
     }
 }
 
